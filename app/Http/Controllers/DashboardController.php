@@ -405,11 +405,44 @@ class DashboardController extends Controller
         
         // Retrieve payment transaction details using the request_id
         $payment_transaction_details = PaymentTransaction::where('request_id', $request_id)->get();
+
+        // Query user's tracks for the authenticated user's email with pagination
+        $user_track = UserTrack::where('request_id', '=', $request_id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
     
-        return view('dashboard.transcript-request-view', compact('payment_transaction_details', 'user_requests'));  
+        return view('dashboard.transcript-request-view', compact('payment_transaction_details', 
+        'user_requests', 'user_track'));  
     }
     
+    public function transcriptRequestAction(Request $request, string $id)
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'comment' => 'required|string',
+            'transcript_status' => 'required|string',
+            
+        ]);
 
+        $user_request = UserRequests::findOrFail($id);                
+        $request_id = $user_request->request_id;
+        
+        // Create UserTrack record
+        $userTrack = UserTrack::create([
+            'user_id' => auth()->user()->id,
+            'request_id' => $request_id,
+            'certificate_status' => $validatedData['transcript_status'],
+            'approved_by' => "admin",
+            'comments' => $validatedData['comment'],
+        ]);
+
+        //--Update user request data-----
+        UserRequests::where('id', $id)->update([
+            'certificate_status' => $validatedData['transcript_status'],            
+        ]);
+
+        return redirect()->route('admin-dashboard')->with('success', 'User request update successful.');
+    }
 
     
 }

@@ -83,8 +83,10 @@ Route::post('/reset-password', [CustomForgotPasswordController::class, 'resetPas
         ->name('admin-account-setting'); 
         Route::get('transcript-request', [DashboardController::class, 'transcriptRequest'])
         ->name('transcript-request'); 
-        Route::get('transcript-request/{id}', [DashboardController::class, 'transcriptRequestView'])
+        Route::get('transcript-request-view/{id}', [DashboardController::class, 'transcriptRequestView'])
         ->name('transcript-request-view'); 
+        Route::post('transcript-request-view/{id}', [DashboardController::class, 'transcriptRequestAction'])
+        ->name('transcript-request.action'); 
         Route::get('users', [DashboardController::class, 'Users'])
         ->name('users'); 
         

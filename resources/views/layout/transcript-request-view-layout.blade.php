@@ -2,7 +2,7 @@
 <html lang="en">
 
 
-<!-- basic-form.html  21 Nov 2019 03:54:41 GMT -->
+<!-- index.html  21 Nov 2019 03:44:50 GMT -->
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
@@ -16,22 +16,16 @@
   <link rel="stylesheet" href="{{asset('dashboard/assets/css/custom.css')}}">
   <link rel='shortcut icon' type='image/x-icon' href="{{asset('dashboard/assets/img/favicon.png')}}" />
   <style>
-    /* Success Alert */
-    .alert.alert-success {
-        background-color: #28a745; /* Green background color */
-        color: #fff; /* White text color */
-        padding: 10px; /* Padding around the text */
-        border-radius: 5px; /* Rounded corners */
+    .black-link {
+    color: black;
+    font-weight: bold;
     }
 
-    /* Error Alert */
-    .alert.alert-danger {
-        background-color: #dc3545; /* Red background color */
-        color: #fff; /* White text color */
-        padding: 10px; /* Padding around the text */
-        border-radius: 5px; /* Rounded corners */
+    .black-link:hover {
+        color: black;
+
     }
-</style>
+  </style>
 </head>
 
 <body>
@@ -76,17 +70,17 @@
           </div>
           <ul class="sidebar-menu">
             <li class="menu-header">Main</li>
-            <li class="dropdown">
-              <a href="{{route('admin-dashboard')}}" class="nav-link"><i data-feather="monitor"></i><span>Dashboard</span></a>
-            </li>
             <li class="dropdown active">
-              <a href="{{route('transcript-request')}}" class="nav-link"><i data-feather="briefcase"></i><span>Transcript Requests</span></a>
+              <a href="{{route('dashboard')}}" class="nav-link"><i data-feather="monitor"></i><span>Dashboard</span></a>
             </li>
             <li class="dropdown">
-              <a href="{{ route('admin-account-setting', ['id' => auth()->user()->id]) }}" class="nav-link"><i data-feather="command"></i><span>Account Settings</span></a>
+              <a href="{{route('user-request')}}" class="nav-link"><i data-feather="briefcase"></i><span>Request Transcript</span></a>
+            </li>
+            <li class="dropdown">
+              <a href="{{ route('account-setting', ['id' => auth()->user()->id]) }}" class="nav-link"><i data-feather="command"></i><span>Account Settings</span></a>
             </li> <li class="dropdown">
-              <a href="{{route('users')}}" class="nav-link"><i data-feather="mail"></i><span>Users</span></a>
-            </li>             
+              <a href="{{route('contact-us')}}" class="nav-link"><i data-feather="mail"></i><span>Contact Us</span></a>
+            </li>               
             
           </ul>
         </aside>
@@ -94,14 +88,7 @@
       <!-- Main Content -->
       <div class="main-content">
         <section class="section">
-          <div class="section-body">
-            <div class="row">
-              <div class="col-12 col-md-6 col-lg-6">
-                <div class="card">
-                  <div class="card-header">
-                    <h4>Transcript Request</h4>
-                  </div>
-                  @if(session('success'))
+        @if(session('success'))
                     <div class="alert alert-success">
                       {{ session('success') }}
                     </div>
@@ -110,17 +97,21 @@
                       {{ session('error') }}
                     </div>
                     @endif	
-                  <div class="card-body">                 
-                        <div class="form-group">
-                      <label></label>
-                      <table width="100%" border="0" cellpadding="4" cellspacing="4">
-                        <tr>
-                            <td><strong><u>Request Information</u> </strong></td>
-                        </tr> 
-                        <form action="">
-                            @csrf
-                             @if ($user_requests->count() > 0)
-			@foreach ($user_requests as $rd)                     
+
+          <div class="row">
+
+          <div class="col-md-6 col-lg-12 col-xl-6">
+              <div class="card">
+                <div class="card-header">
+                  <h4>Transcript Request</h4>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table width="100%" border="0" cellspacing="3">
+                    @if ($user_requests->count() > 0)
+			@foreach ($user_requests as $rd)
+                        <form action="{{ route('transcript-request.action', $rd->id) }}"method="post">
+                            @csrf                                                  
                       <tr>
                         <td>
                         <label>Request ID</label>
@@ -202,8 +193,8 @@
 			<td colspan="8">Transaction Details not available.</td>
 		</tr>
 		@endif    
+    
         
-        <hr>
         <tr>
             <td>
             <div class="form-group">
@@ -213,8 +204,10 @@
                 @error('comment')
                     <span class="invalid-feedback">{{ $message }}</span>
                 @enderror 
-            </td>
-            <td>
+            </td>            
+        </tr>
+        <tr>
+        <td>
             <div class="form-group">
                     <label>Transcript Status</label>
                     <select name="transcript_status" id="" class="form-control" required>
@@ -232,15 +225,45 @@
                     <input class="btn btn-primary mr-1" type="submit" value="Proceed"></input>
                   </div>          
                         </form>
-                       
-                    </div>
-                  </div>                  
-                   
-                  
-                </div>               
-
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
+
+
+            <div class="col-md-6 col-lg-12 col-xl-6">
+              <!-- Support tickets -->
+              <div class="card">
+                <div class="card-header">
+                  <h4>Request Status</h4>                  
+                </div>
+                @if ($user_track->count() > 0)
+			@foreach ($user_track as $rs)
+                <div class="card-body">                 
+                  <div class="support-ticket media pb-1 mb-3">                 
+                    <img src="{{asset('dashboard/assets/img/blank.jpg')}}" class="user-img mr-2" alt="">
+                    <div class="media-body ml-3">
+                      <div class="badge badge-pill badge-info mb-1 float-right">{{$rs->certificate_status}}</div>
+                      <span class="font-weight-bold">{{$rs->request_id}}</span>
+                      <!-- <a href="javascript:void(0)">About template page load speed</a> -->
+                      <p class="my-1">{{$rs->comments}}</p>
+                      <small class="text-muted">Updated by <span class="font-weight-bold font-13">{{$rs->approved_by}}</span>
+                        &nbsp;&nbsp; on {{ \Carbon\Carbon::parse($rs->created_at)->format('F j, Y, h:i A') }}
+
+</small>
+                    </div>                                     
+                  </div>                 
+                </div>  
+                @endforeach 
+		@else
+    <p>Transcript status not available.</p>		
+		@endif            
+               <p> {{ $user_track->appends(['tab' => 'transcript-status'])->links() }}</p>
+              </div>
+              <!-- Support tickets -->
+            </div>
+            
           </div>
         </section>
         <div class="settingSidebar">
@@ -344,8 +367,8 @@
       </footer>
     </div>
   </div>
-   <!-- General JS Scripts -->
-   <script src="{{asset('dashboard/assets/js/app.min.js')}}"></script>
+  <!-- General JS Scripts -->
+  <script src="{{asset('dashboard/assets/js/app.min.js')}}"></script>
   <!-- JS Libraies -->
   <script src="{{asset('dashboard/assets/bundles/apexcharts/apexcharts.min.js')}}"></script>
   <!-- Page Specific JS File -->
@@ -357,5 +380,5 @@
 </body>
 
 
-<!-- basic-form.html  21 Nov 2019 03:54:41 GMT -->
+<!-- index.html  21 Nov 2019 03:47:04 GMT -->
 </html>
