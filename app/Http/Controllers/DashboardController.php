@@ -44,7 +44,18 @@ class DashboardController extends Controller
         $users = User::where('user_type', '=', 'admin')->get();
 
         // Query all user request 
-        $user_requests = UserRequests::orderBy('created_at', 'desc')->paginate(10);        
+        //$user_requests = UserRequests::orderBy('created_at', 'desc')->paginate(10);  
+        // Query successful payment transactions
+        $successful_transactions = PaymentTransaction::where('transaction_status', 'Successful')->get();
+
+        // Extract request IDs from successful transactions
+        $successful_request_ids = $successful_transactions->pluck('request_id');
+
+        // Query user requests using the request IDs
+        $user_requests = UserRequests::whereIn('request_id', $successful_request_ids)
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+    
         
        return view('dashboard.dashboard-admin', compact('users', 'user_requests'
        ));        
@@ -361,6 +372,44 @@ class DashboardController extends Controller
     {
         return view('dashboard.contact-us');
     }
+
+    public function transcriptRequest()
+    {
+        $user_id = auth()->user()->id;
+        // Query all admin user
+        $users = User::where('user_type', '=', 'admin')->get();
+        
+        // Query successful payment transactions
+        $successful_transactions = PaymentTransaction::where('transaction_status', 'Successful')->get();
+
+        // Extract request IDs from successful transactions
+        $successful_request_ids = $successful_transactions->pluck('request_id');
+
+        // Query user requests using the request IDs
+        $user_requests = UserRequests::whereIn('request_id', $successful_request_ids)
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+    
+        
+       return view('dashboard.transcript-request', compact('users', 'user_requests'
+       ));        
+    }    
+    
+    public function transcriptRequestView(Request $request, string $id)
+    {
+        $user_requests = UserRequests::where('id', '=', $id)->get();
+        // Retrieve the UserRequest record by ID
+        $user_request = UserRequests::findOrFail($id);        
+        // Extract the request_id from the retrieved UserRequest record
+        $request_id = $user_request->request_id;
+        
+        // Retrieve payment transaction details using the request_id
+        $payment_transaction_details = PaymentTransaction::where('request_id', $request_id)->get();
+    
+        return view('dashboard.transcript-request-view', compact('payment_transaction_details', 'user_requests'));  
+    }
+    
+
 
     
 }

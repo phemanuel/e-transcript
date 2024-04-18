@@ -79,12 +79,15 @@ Route::post('/reset-password', [CustomForgotPasswordController::class, 'resetPas
         //Admin Dashboard----
         Route::get('admin-dashboard', [DashboardController::class, 'indexAdmin'])
         ->name('admin-dashboard');   
-        Route::get('admin-account-setting/{id}', [AuthController::class, 'profileUpdate'])
+        Route::get('admin-account-setting/{id}', [AuthController::class, 'profileUpdateAdmin'])
         ->name('admin-account-setting'); 
-        Route::get('transcript-request', [AuthController::class, 'transcriptRequest'])
+        Route::get('transcript-request', [DashboardController::class, 'transcriptRequest'])
         ->name('transcript-request'); 
-        Route::get('users', [AuthController::class, 'Users'])
+        Route::get('transcript-request/{id}', [DashboardController::class, 'transcriptRequestView'])
+        ->name('transcript-request-view'); 
+        Route::get('users', [DashboardController::class, 'Users'])
         ->name('users'); 
+        
 
         //--Send mail routes
         Route::get('send-mail-fail/{transaction_id}', [MailController::class, 'mailFailed'])

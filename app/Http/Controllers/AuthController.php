@@ -184,6 +184,12 @@ class AuthController extends Controller
     
     }
 
+    public function profileUpdateAdmin(Request $request, string $id)
+    {
+        return view('auth.admin-account-setting');
+    
+    }
+
     //----update user profile
     public function profileUpdateSocial(Request $request, string $id)
     {
