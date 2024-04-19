@@ -12,6 +12,12 @@ use App\Models\PaymentTransaction;
 use App\Models\UserYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use Exception;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -426,10 +432,12 @@ class DashboardController extends Controller
 
         $user_request = UserRequests::findOrFail($id);                
         $request_id = $user_request->request_id;
+        $user_id = $user_request->user_id;
+
         
         // Create UserTrack record
         $userTrack = UserTrack::create([
-            'user_id' => auth()->user()->id,
+            'user_id' => $user_id,
             'request_id' => $request_id,
             'certificate_status' => $validatedData['transcript_status'],
             'approved_by' => "admin",
@@ -441,8 +449,63 @@ class DashboardController extends Controller
             'certificate_status' => $validatedData['transcript_status'],            
         ]);
 
-        return redirect()->route('admin-dashboard')->with('success', 'User request update successful.');
+        return redirect()->route('admin-dashboard')->with('success', 'Transcript request update successful.');
     }
 
-    
+    public function Users()
+    {
+        $users = User::where('user_type', '=', 'admin')->paginate(10);
+
+        return view('auth.users', compact('users'));  
+
+    }
+
+    public function addUser()
+    {
+        return view('auth.add-user');
+    }
+
+    public function addUserAction(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'last_name' => 'required|string|max:255',
+                'first_name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+
+            $email_token =Str::random(40);            
+
+            $user = User::create([
+                'last_name' => $validatedData['last_name'],
+                'first_name' => $validatedData['first_name'],
+                'email' => $validatedData['email'],
+                'password' => Hash::make($validatedData['password']),                
+                'email_verified_status' => 1,
+                'login_attempts' => 0,
+                'remember_token' => $email_token,
+                // 'user_picture' => 'profile_pictures/blank.jpg',
+                'user_type' => 'admin',                
+            ]);
+
+            // $email_message = "We have sent instructions to verify your email, kindly follow instructions to continue, 
+            // please check both your inbox and spam folder.";
+            // session(['email' => $validatedData['email']]);
+            // session(['full_name' => $validatedData['first_name']]);
+            // session(['email_token' => $email_token]);
+            // session(['email_message' => $email_message]);
+
+
+            return redirect()->route('admin-dashboard')->with('success', 'User has been created successfully.');
+        } catch (ValidationException $e) {
+            // Validation failed. Redirect back with validation errors.
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (Exception $e) {
+            // Log the error
+            Log::error('Error during user registration: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'An error occurred during registration. Please try again.');
+        }
+    }
 }

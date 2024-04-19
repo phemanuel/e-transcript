@@ -50,7 +50,7 @@
                 class="user-img-radious-style"> <span class="d-sm-none d-lg-inline-block"></span></a>
             <div class="dropdown-menu dropdown-menu-right pullDown">
               <div class="dropdown-title">Hello {{auth()->user()->first_name}}</div> 
-              <a href="{{ route('account-setting', ['id' => auth()->user()->id]) }}" class="dropdown-item has-icon"> <i class="fas fa-cog"></i>
+              <a href="{{ route('admin-account-setting', ['id' => auth()->user()->id]) }}" class="dropdown-item has-icon"> <i class="fas fa-cog"></i>
                 Account Settings
               </a>
               <div class="dropdown-divider"></div>
@@ -70,17 +70,17 @@
           </div>
           <ul class="sidebar-menu">
             <li class="menu-header">Main</li>
+            <li class="dropdown">
+              <a href="{{route('admin-dashboard')}}" class="nav-link"><i data-feather="monitor"></i><span>Dashboard</span></a>
+            </li>
             <li class="dropdown active">
-              <a href="{{route('dashboard')}}" class="nav-link"><i data-feather="monitor"></i><span>Dashboard</span></a>
+              <a href="{{route('transcript-request')}}" class="nav-link"><i data-feather="briefcase"></i><span>Transcript Requests</span></a>
             </li>
             <li class="dropdown">
-              <a href="{{route('user-request')}}" class="nav-link"><i data-feather="briefcase"></i><span>Request Transcript</span></a>
-            </li>
-            <li class="dropdown">
-              <a href="{{ route('account-setting', ['id' => auth()->user()->id]) }}" class="nav-link"><i data-feather="command"></i><span>Account Settings</span></a>
+              <a href="{{ route('admin-account-setting', ['id' => auth()->user()->id]) }}" class="nav-link"><i data-feather="command"></i><span>Account Settings</span></a>
             </li> <li class="dropdown">
-              <a href="{{route('contact-us')}}" class="nav-link"><i data-feather="mail"></i><span>Contact Us</span></a>
-            </li>               
+              <a href="{{route('users')}}" class="nav-link"><i data-feather="mail"></i><span>Users</span></a>
+            </li>              
             
           </ul>
         </aside>

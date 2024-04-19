@@ -73,12 +73,12 @@
             <li class="dropdown">
               <a href="{{route('admin-dashboard')}}" class="nav-link"><i data-feather="monitor"></i><span>Dashboard</span></a>
             </li>
-            <li class="dropdown active">
+            <li class="dropdown">
               <a href="{{route('transcript-request')}}" class="nav-link"><i data-feather="briefcase"></i><span>Transcript Requests</span></a>
             </li>
             <li class="dropdown">
               <a href="{{ route('admin-account-setting', ['id' => auth()->user()->id]) }}" class="nav-link"><i data-feather="command"></i><span>Account Settings</span></a>
-            </li> <li class="dropdown">
+            </li> <li class="dropdown active">
               <a href="{{route('users')}}" class="nav-link"><i data-feather="mail"></i><span>Users</span></a>
             </li>               
             
@@ -88,7 +88,27 @@
       <!-- Main Content -->
       <div class="main-content">
         <section class="section">
-        @if(session('success'))
+        
+        <div class="row ">
+              <div class="col-xl-3 col-lg-6">
+                <div class="card l-bg-green">
+                  <div class="card-statistic-3">
+                    <div class="card-icon card-icon-large"><i class="fa fa-award"></i></div>
+                    <div class="card-content">
+                      <h4 class="card-title">Users - {{$users->count()}}</h4>
+                      <span><strong></strong></span>
+                      <div class="progress mt-1 mb-1" data-height="8">
+                        <div class="progress-bar l-bg-purple" role="progressbar" data-width="{{$users->count()}}" aria-valuenow="{{$users->count()}}"
+                          aria-valuemin="0" aria-valuemax="{{$users->count()}}"></div>
+                      </div>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div> 
+              
+            </div>
+            @if(session('success'))
                     <div class="alert alert-success">
                       {{ session('success') }}
                     </div>
@@ -97,56 +117,19 @@
                       {{ session('error') }}
                     </div>
                     @endif	
-        <div class="row ">
-              
-        <div class="col-xl-3 col-lg-6">
-                <div class="card l-bg-green">
-                  <div class="card-statistic-3">
-                    <div class="card-icon card-icon-large"><i class="fa fa-award"></i></div>
-                    <div class="card-content">
-                      <h4 class="card-title">No of Request - {{$user_requests->count()}}</h4>
-                      <span><strong></strong></span>
-                      <div class="progress mt-1 mb-1" data-height="8">
-                        <div class="progress-bar l-bg-purple" role="progressbar" data-width="{{$user_requests->count()}}" aria-valuenow="{{$user_requests->count()}}"
-                          aria-valuemin="0" aria-valuemax="{{$user_requests->count()}}"></div>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>    
-
-              <div class="col-xl-3 col-lg-6">
-                <div class="card l-bg-cyan">
-                  <div class="card-statistic-3">
-                    <div class="card-icon card-icon-large"><i class="fa fa-briefcase"></i></div>
-                    <div class="card-content">
-                      <h4 class="card-title">Users - {{$users->count()}}</h4>
-                      <span><strong></strong></span>
-                      <div class="progress mt-1 mb-1" data-height="8">
-                        <div class="progress-bar l-bg-orange" role="progressbar" data-width="{{$users->count()}}" aria-valuenow="{{$users->count()}}"
-                          aria-valuemin="0" aria-valuemax="{{$users->count()}}"></div>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            </div>
-          
           <div class="row">
             <div class="col-12">
               <div class="card">
                 <div class="card-header">
-                  <h4>Transcript Requests</h4>
+                  <h4></h4>
                   <div class="card-header-form">
-                    <form>
+                    <form>                    
                       <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search">
-                        <div class="input-group-btn">
+                      <a href="{{route('add-user')}}" class="btn btn-primary">Add User</a>
+                        <!-- <input type="text" class="form-control" placeholder="Search"> -->
+                        <!-- <div class="input-group-btn">
                           <button class="btn btn-primary"><i class="fas fa-search"></i></button>
-                        </div>
+                        </div> -->
                       </div>
                     </form>
                   </div>
@@ -156,39 +139,31 @@
                     <table class="table table-striped">
                       <tr>           
                       <th></th>             
-                        <th>Request ID</th>
                         <th>Email Address</th>
-                        <th>Matric No</th>
-                        <th>Full Name</th>
-                        <th>Graduation Year</th>
-                        <th>Programme</th>
-                        <th>Clearance No</th>
-                        <th>Date</th>
+                        <th>Admin Name</th>
+                        <th>Status</th>
+                        <th>Created On</th>
                         <th>Action</th>
                       </tr>
 
-                      @if ($user_requests->count() > 0)
-			@foreach ($user_requests as $rd)
+                      @if ($users->count() > 0)
+			@foreach ($users as $rd)
                       <tr> 
-                        <td></td>                       
-                        <td>{{$rd->request_id}}</td>
+                        <td></td> 
                         <td>{{$rd->email}}</td>
-                        <td>{{$rd->matric_no}}</td>
-                        <td>{{$rd->certificate_name}}</td>
-                        <td>{{$rd->graduation_year}}</td>
-                        <td>{{$rd->programme}}</td>
-                        <td>{{$rd->clearance_no}}</td>
+                        <td>{{$rd->last_name . " " . $rd->first_name}}</td>
+                        <td><div class="badge badge-info">{{$rd->user_type}}</div></td>
                         <td>{{$rd->created_at}}</td>
-                        <td><a href="{{ route('transcript-request-view', ['id' => auth()->user()->id]) }}" class="btn btn-outline-primary">View</a></td>
+                        <td><a href="#" class="btn btn-outline-primary">Edit</a></td>
                       </tr>  
                       @endforeach
 		@else
 		<tr>
-			<td colspan="8">Transcript request not available.</td>
+			<td colspan="8">Users not available.</td>
 		</tr>
 		@endif                                   
                     </table>
-                    {{ $user_requests->links() }}
+                    {{ $users->links() }}
                   </div>
                 </div>
               </div>

@@ -89,6 +89,10 @@ Route::post('/reset-password', [CustomForgotPasswordController::class, 'resetPas
         ->name('transcript-request.action'); 
         Route::get('users', [DashboardController::class, 'Users'])
         ->name('users'); 
+        Route::get('add-user', [DashboardController::class, 'addUser'])
+        ->name('add-user'); 
+        Route::post('add-user', [DashboardController::class, 'addUserAction'])
+        ->name('add-user.action'); 
         
 
         //--Send mail routes
