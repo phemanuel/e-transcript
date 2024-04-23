@@ -103,23 +103,21 @@
           <div class="col-md-6 col-lg-12 col-xl-6">
               <div class="card">
                 <div class="card-header">
-                @if ($user_requests->count() > 0)
-			@foreach ($user_requests as $rs)
+                
                 <table width="100%">
                     <tr>
                       <td><h4>Transcript Requests</h4></td>
-                      <td align="right"><a href="{{ route('transcript-upload', ['id' => $rs->user_id]) }}" class="btn btn-primary">Upload Transcript</a></td>
+                      <td align="right"></td>
                     </tr>
                   </table>
-                  @endforeach
-                  @endif
+                  
                 </div>
                 <div class="card-body">
                   <div class="table-responsive">
                     <table width="100%" border="0" cellspacing="3">
                     @if ($user_requests->count() > 0)
 			@foreach ($user_requests as $rd)
-                        <form action="{{ route('transcript-request.action', $rd->id) }}"method="post">
+                        <form action="{{ route('transcript-upload.action', $rd->id) }}"method="post" enctype="multipart/form-data">
                             @csrf                                                  
                       <tr>
                         <td>
@@ -167,43 +165,18 @@
 			<td colspan="8">Request Details not available.</td>
 		</tr>
 		@endif             
-<hr>
+<hr>         
         <tr>
-                            <td><strong><u>Payment Information</u></strong></td>
-                        </tr> 
-                        @if ($payment_transaction_details->count() > 0)
-			@foreach ($payment_transaction_details as $rs)                     
-                      <tr>
-                        <td>
-                        <label>Transaction ID</label>
-                        <p>{{ $rs->transaction_id }}</p>                    
-                        </td> 
-                        <td>
-                        <label>Amount</label>
-                        <p>=N={{ number_format($rs->amount,2) }}</p>                    
-                        </td>              
-                        </tr>
-                        <tr>
-                        <td>
-                        <label>Status</label>
-                        <p>{{ $rs->transaction_status }}</p>                    
-                        </td> 
-                        <td>
-                        <label>Payment Date</label>
-                        <p>{{ $rs->created_at }}</p>                    
-                        </td>              
-                        </tr>
-                        <tr>
-                            <td></td>
-                        </tr>
-                        @endforeach
-		@else
-		<tr>
-			<td colspan="8">Transaction Details not available.</td>
-		</tr>
-		@endif    
-    
-        
+            <td>
+            <div class="form-group">
+                    <label>Transcript File(PDF)</label>
+                   <input type="file" name="transcript_file" class="form-control" required>
+                </div>  
+                @error('file')
+                    <span class="invalid-feedback">{{ $message }}</span>
+                @enderror  
+            </td>
+        </tr>
         <tr>
             <td>
             <div class="form-group">

@@ -98,6 +98,24 @@
                     </div>
                     @endif	
         <div class="row ">
+
+        <div class="col-xl-3 col-lg-6">
+                <div class="card l-bg-cyan">
+                  <div class="card-statistic-3">
+                    <div class="card-icon card-icon-large"><i class="fa fa-briefcase"></i></div>
+                    <div class="card-content">
+                      <h4 class="card-title">Users - {{$users->count()}}</h4>
+                      <span><strong></strong></span>
+                      <div class="progress mt-1 mb-1" data-height="8">
+                        <div class="progress-bar l-bg-orange" role="progressbar" data-width="{{$users->count()}}" aria-valuenow="{{$users->count()}}"
+                          aria-valuemin="0" aria-valuemax="{{$users->count()}}"></div>
+                      </div>
+                      <div> <a href="{{route('users')}}" class="black-link">Check list of users</a></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="col-xl-3 col-lg-6">
                 <div class="card l-bg-green">
                   <div class="card-statistic-3">
@@ -109,24 +127,24 @@
                         <div class="progress-bar l-bg-purple" role="progressbar" data-width="{{$user_requests->count()}}" aria-valuenow="{{$user_requests->count()}}"
                           aria-valuemin="0" aria-valuemax="{{$user_requests->count()}}"></div>
                       </div>
-                      
+                      <div> <a href="{{route('transcript-request')}}" class="black-link">Check list of transcript requests</a></div>
                     </div>
                   </div>
                 </div>
               </div>    
               
               <div class="col-xl-3 col-lg-6">
-                <div class="card l-bg-cyan">
+                <div class="card l-bg-orange">
                   <div class="card-statistic-3">
-                    <div class="card-icon card-icon-large"><i class="fa fa-briefcase"></i></div>
+                    <div class="card-icon card-icon-large"><i class="fa fa-money-bill-alt"></i></div>
                     <div class="card-content">
-                      <h4 class="card-title">Users - {{$users->count()}}</h4>
-                      <span><strong></strong></span>
+                      <h4 class="card-title">Transcript Uploads - {{$user_transcript->count()}}</h4>
+                      <span></span>
                       <div class="progress mt-1 mb-1" data-height="8">
-                        <div class="progress-bar l-bg-orange" role="progressbar" data-width="{{$users->count()}}" aria-valuenow="{{$users->count()}}"
-                          aria-valuemin="0" aria-valuemax="{{$users->count()}}"></div>
+                        <div class="progress-bar l-bg-green" role="progressbar" data-width="" aria-valuenow=""
+                          aria-valuemin="0" aria-valuemax="10000"></div>
                       </div>
-                      
+                      <div> <a href="{{route('user-transcript-upload')}}" class="black-link">Check list of transcript uploads</a></div>
                     </div>
                   </div>
                 </div>
@@ -245,6 +263,7 @@
                         <th>Programme</th>
                         <th>Clearance No</th>
                         <th>Date</th>
+                        <th>Status</th>
                         <th>Action</th>
                       </tr>
 
@@ -260,7 +279,8 @@
                         <td>{{$rd->programme}}</td>
                         <td>{{$rd->clearance_no}}</td>
                         <td>{{$rd->created_at}}</td>
-                        <td><a href="{{ route('transcript-request-view', ['id' => auth()->user()->id]) }}" class="btn btn-outline-primary">View</a></td>
+                        <td>{{$rd->certificate_status}}</td>
+                        <td><a href="{{ route('transcript-request-view', ['id' => $rd->id]) }}" class="btn btn-outline-primary">View</a></td>
                       </tr>  
                       @endforeach
 		@else

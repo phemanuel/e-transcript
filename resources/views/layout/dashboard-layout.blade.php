@@ -126,13 +126,31 @@
                         <div class="progress-bar l-bg-orange" role="progressbar" data-width="{{$user_payment->count()}}" aria-valuenow="{{$user_payment->count()}}"
                           aria-valuemin="0" aria-valuemax="{{$user_payment->count()}}"></div>
                       </div>
+                      <div><a href="{{route('payment-report')}}" class="black-link">Check payment history</a></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-xl-3 col-lg-6">
+                <div class="card l-bg-orange">
+                  <div class="card-statistic-3">
+                    <div class="card-icon card-icon-large"><i class="fa fa-money-bill-alt"></i></div>
+                    <div class="card-content">
+                      <h4 class="card-title">Transcript - {{$user_transcript->count()}}</h4>
+                      <span></span>
+                      <div class="progress mt-1 mb-1" data-height="8">
+                        <div class="progress-bar l-bg-green" role="progressbar" data-width="" aria-valuenow=""
+                          aria-valuemin="0" aria-valuemax="10000"></div>
+                      </div>
                       
                     </div>
                   </div>
                 </div>
               </div>
-              
+
             </div>
+           
 
           <div class="row ">
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12">

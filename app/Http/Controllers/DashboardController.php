@@ -9,6 +9,7 @@ use App\Models\UserProgramme;
 use App\Models\UserClearance;
 use App\Models\TranscriptFee;
 use App\Models\PaymentTransaction;
+use App\Models\TranscriptUpload;
 use App\Models\UserYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -39,9 +40,13 @@ class DashboardController extends Controller
         $user_payment = PaymentTransaction::where('user_id', '=', $user_id)
             ->orderBy('created_at', 'desc')
             ->paginate(5);
+
+            // Query user's transcript
+        $user_transcript = TranscriptUpload::where('user_id', '=', $user_id)
+        ->get();
         
        return view('dashboard.dashboard', compact('user_track', 'user_request'
-       ,'user_payment'));        
+       ,'user_payment','user_transcript'));        
     }
     public function indexAdmin()
     {
@@ -57,14 +62,23 @@ class DashboardController extends Controller
         // Extract request IDs from successful transactions
         $successful_request_ids = $successful_transactions->pluck('request_id');
 
-        // Query user requests using the request IDs
+        // Query user requests using the request IDs 
         $user_requests = UserRequests::whereIn('request_id', $successful_request_ids)
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
+            ->orderByRaw("CASE 
+                                WHEN certificate_status = 'In progress' THEN 1
+                                WHEN certificate_status = 'Processing' THEN 2
+                                WHEN certificate_status = 'Ready for pick-up' THEN 3
+                                ELSE 4
+                            END")
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+
+        // Query user's transcript
+        $user_transcript = TranscriptUpload::all();
     
         
-       return view('dashboard.dashboard-admin', compact('users', 'user_requests'
-       ));        
+       return view('dashboard.dashboard-admin', compact('users', 'user_requests','user_transcript'));        
     }
 
     public function userRequest()
@@ -391,14 +405,21 @@ class DashboardController extends Controller
         // Extract request IDs from successful transactions
         $successful_request_ids = $successful_transactions->pluck('request_id');
 
-        // Query user requests using the request IDs
         $user_requests = UserRequests::whereIn('request_id', $successful_request_ids)
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
+            ->orderByRaw("CASE 
+                                WHEN certificate_status = 'In progress' THEN 1
+                                WHEN certificate_status = 'Processing' THEN 2
+                                WHEN certificate_status = 'Ready for pick-up' THEN 3
+                                ELSE 4
+                            END")
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        // Query user's transcript
+        $user_transcript = TranscriptUpload::all();
     
         
-       return view('dashboard.transcript-request', compact('users', 'user_requests'
-       ));        
+       return view('dashboard.transcript-request', compact('users', 'user_requests', 'user_transcript'));        
     }    
     
     public function transcriptRequestView(Request $request, string $id)
@@ -434,6 +455,13 @@ class DashboardController extends Controller
         $request_id = $user_request->request_id;
         $user_id = $user_request->user_id;
 
+        // Check if an upload has been made for the request_id
+        $transcriptUpload = TranscriptUpload::where('request_id', $request_id)->first();
+
+        if ($transcriptUpload) {
+            // If an upload has already been done, redirect back with a message
+            return redirect()->back()->with('error', 'Transcript has already been uploaded for this request.');
+        }
         
         // Create UserTrack record
         $userTrack = UserTrack::create([
@@ -508,4 +536,131 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'An error occurred during registration. Please try again.');
         }
     }
+
+    public function transcriptUpload(Request $request, string $id)
+    {
+        $user_requests = UserRequests::where('id', '=', $id)->get();
+        // Retrieve the UserRequest record by ID
+        $user_request = UserRequests::findOrFail($id);        
+        // Extract the request_id from the retrieved UserRequest record
+        $request_id = $user_request->request_id;
+        
+        // Retrieve payment transaction details using the request_id
+        $payment_transaction_details = PaymentTransaction::where('request_id', $request_id)->get();
+
+        // Query user's tracks for the authenticated user's email with pagination
+        $user_track = UserTrack::where('request_id', '=', $request_id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
+    
+        return view('dashboard.transcript-upload', compact('payment_transaction_details', 
+        'user_requests', 'user_track'));  
+    }
+
+    public function transcriptUploadAction(Request $request, string $id) 
+    {
+        try {
+            $validatedData = $request->validate([
+                'comment' => 'required|string',
+                'transcript_status' => 'required|string',
+                'transcript_file' => 'nullable|mimes:pdf',
+            ]);       
+
+            $user_request = UserRequests::findOrFail($id);                
+            $request_id = $user_request->request_id;
+            $user_id = $user_request->user_id;
+            $email = $user_request->email;
+
+            // Check if an upload has been made for the request_id
+            $transcriptUpload = TranscriptUpload::where('request_id', $request_id)->first();
+
+            if ($transcriptUpload) {
+                // If an upload has already been done, redirect back with a message
+                return redirect()->back()->with('error', 'Transcript has already been uploaded for this request.');
+            }
+
+            // Proceed with file upload only if a file has been uploaded
+            if ($request->hasFile('transcript_file')) {
+                $userCertificateFile = $request->file('transcript_file');
+                $request_id_new = str_replace('#', '', $request_id);
+                // Generate filenames                 
+                $userCertificateFilename = $request_id_new . '_transcript.' . $userCertificateFile->getClientOriginalExtension();
+                // Store file
+                $certificatePath = $userCertificateFile->storeAs('transcript', $userCertificateFilename, 'public');
+            }
+
+            // Create UserTranscript record
+            $userTranscript = TranscriptUpload::create([
+                'user_id' => $user_id,
+                'request_id' => $request_id,
+                'email' => $email,
+                'upload_by' => "admin",
+                'status' => "successful",
+                'transcript_dir' => $certificatePath ?? null, 
+            ]);
+
+            // Create UserTrack record
+            $userTrack = UserTrack::create([
+                'user_id' => $user_id,
+                'request_id' => $request_id,
+                'certificate_status' => $validatedData['transcript_status'],
+                'approved_by' => "admin",
+                'comments' => $validatedData['comment'],
+            ]);
+
+            //--Update user request data-----
+            UserRequests::where('id', $id)->update([
+                'certificate_status' => $validatedData['transcript_status'],            
+            ]); 
+
+            return redirect()->route('admin-dashboard')->with('success', 'User transcript upload successful.');
+        } catch (ValidationException $e) {
+            // Validation failed. Redirect back with validation errors.
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (Exception $e) {
+            // Log the error
+            $errorMessage = 'Error-User transcript upload: ' . $e->getMessage();
+            Log::error($errorMessage);
+
+            return redirect()->back()->with('error', 'An error occurred during User transcript upload. Please try again.');
+        }
+    }
+
+    public function userTranscriptUpload()
+    {
+        $user_id = auth()->user()->id;
+        // Query all admin users
+        $users = User::where('user_type', '=', 'admin')->get();
+        
+        // Query successful payment transactions
+        $successful_transactions = PaymentTransaction::where('transaction_status', 'Successful')->get();
+
+        // Extract request IDs from successful transactions
+        $successful_request_ids = $successful_transactions->pluck('request_id');
+
+        // Query successful transcript uploads
+        $transcript_uploads = TranscriptUpload::where('status', 'Successful')->get();
+
+        // Extract request IDs from successful transcript uploads
+        $successful_request_ids = $transcript_uploads->pluck('request_id');
+
+        // Query user requests based on successful request IDs
+        $user_requests = UserRequests::whereIn('request_id', $successful_request_ids)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        // Add date of upload to each user request
+        foreach ($user_requests as $user_request) {
+            $transcript_upload = TranscriptUpload::where('request_id', $user_request->request_id)->first();
+            $user_request->date_of_upload = $transcript_upload ? $transcript_upload->created_at : null;
+        }
+
+        // Query user's transcript uploads
+        $user_transcript = TranscriptUpload::all();
+
+        // Pass variables to the view
+        return view('dashboard.user-transcript-upload', compact('users', 'user_requests', 'user_transcript', 'transcript_uploads'));
+    }
+   
+
 }

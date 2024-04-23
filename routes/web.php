@@ -87,6 +87,12 @@ Route::post('/reset-password', [CustomForgotPasswordController::class, 'resetPas
         ->name('transcript-request-view'); 
         Route::post('transcript-request-view/{id}', [DashboardController::class, 'transcriptRequestAction'])
         ->name('transcript-request.action'); 
+        Route::get('transcript-upload/{id}', [DashboardController::class, 'transcriptUpload'])
+        ->name('transcript-upload'); 
+        Route::post('transcript-upload/{id}', [DashboardController::class, 'transcriptUploadAction'])
+        ->name('transcript-upload.action'); 
+        Route::get('user-transcript-upload', [DashboardController::class, 'userTranscriptUpload'])
+        ->name('user-transcript-upload');
         Route::get('users', [DashboardController::class, 'Users'])
         ->name('users'); 
         Route::get('add-user', [DashboardController::class, 'addUser'])

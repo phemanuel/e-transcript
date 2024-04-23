@@ -101,7 +101,7 @@
                   <div class="card-header">
                     <h4>Payment</h4>
                   </div>
-                  @if(session('success'))
+                  <!-- @if(session('success'))
                     <div class="alert alert-success">
                       {{ session('success') }}
                     </div>
@@ -109,7 +109,7 @@
                     <div class="alert alert-danger">
                       {{ session('error') }}
                     </div>
-                    @endif	
+                    @endif	 -->
                   <div class="card-body">                 
                         <div class="form-group">
                       <label></label>
